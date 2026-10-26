@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plain Text (.TXT) to OpenXML (.DOCX) Encoding & Conversion Specification</title>
+  <meta name="description" content="Technical reference for converting large UTF-8 and ASCII plain text (.txt) log files and Notepad documents into Microsoft Word OpenXML (.docx) without line-break or character loss.">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #8b5cf6;
+      --border: #334155;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      margin: 0;
+      padding: 2.5rem 1.25rem;
+    }
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      background: var(--card);
+      padding: 2.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    h1, h2, h3 {
+      color: #ffffff;
+      line-height: 1.3;
+    }
+    h1 {
+      font-size: 1.9rem;
+      margin-top: 0;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    h2 {
+      font-size: 1.35rem;
+      margin-top: 2rem;
+    }
+    a {
+      color: #a78bfa;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    a:hover {
+      color: #c4b5fd;
+    }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: #090d16;
+      border-radius: 6px;
+    }
+    code {
+      padding: 0.2rem 0.4rem;
+      font-size: 0.9em;
+    }
+    pre {
+      padding: 1rem;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background: #090d16;
+      color: #e2e8f0;
+    }
+    .callout {
+      background: rgba(139, 92, 246, 0.12);
+      border-left: 4px solid var(--accent);
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .footer {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>Plain Text (.TXT) to OpenXML (.DOCX) Conversion &amp; UTF-8 Encoding Benchmark</h1>
+    <p>
+      Converting unformatted plain text streams (<code>.txt</code>, Windows Notepad exports, CLI dumps, and system logs) into structured Microsoft Word OpenXML (<code>.docx</code>) documents presents specific challenges around character encoding, CRLF/LF line-break normalization, and memory allocation on large files.
+    </p>
+
+    <div class="callout">
+      <strong>Live Web Implementation:</strong> To test large-file (up to 200MB) plain text and Notepad conversion directly in the browser without local CLI installation, use the <a href="https://www.digitoolvault.com/tools/txt-to-word">free TXT to Word converter</a> powered by DigiToolVault's cloud Pandoc pipeline.
+    </div>
+
+    <h2>1. Common Failure Points in Standard TXT-to-DOCX Pipelines</h2>
+    <ul>
+      <li><strong>CRLF vs. LF Line Wrapping:</strong> Raw text files generated on Linux/macOS (<code>\n</code>) vs. Windows Notepad (<code>\r\n</code>) often collapse into single unbroken paragraphs when imported naively into Word processors.</li>
+      <li><strong>UTF-8 Byte Order Mark (BOM) &amp; Mojibake:</strong> Legacy converters frequently assume Windows-1252 or ASCII encoding, corrupting multilingual characters, symbols, and box-drawing glyphs.</li>
+      <li><strong>Memory Ceiling on Large Log Files:</strong> Browser-only JavaScript DOM converters crash when parsing <code>.txt</code> files larger than 15MB–25MB.</li>
+    </ul>
+
+    <h2>2. Benchmark Comparison: File Size &amp; Pipeline Architecture</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Conversion Parameter</th>
+          <th>Legacy Web Converters</th>
+          <th>DigiToolVault Pandoc Pipeline</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Maximum File Size</strong></td>
+          <td>5MB – 15MB cap (Free Tier)</td>
+          <td><strong>Up to 200MB per file</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Input Methods</strong></td>
+          <td>File upload only</td>
+          <td>Drag-and-Drop <code>.txt</code> + Direct <strong>Paste Plain Text</strong> mode</td>
+        </tr>
+        <tr>
+          <td><strong>Character Encoding</strong></td>
+          <td>Basic ASCII / Latin-1</td>
+          <td>Full UTF-8, UTF-16 &amp; ASCII auto-detection</td>
+        </tr>
+        <tr>
+          <td><strong>Output Format</strong></td>
+          <td><code>.docx</code></td>
+          <td>Native Office OpenXML (<code>.docx</code>) compatible with MS Word &amp; Google Docs</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. CLI Reference vs. Hosted Cloud Utility</h2>
+    <p>When converting locally via Pandoc, hard line breaks and UTF-8 input streams can be preserved using:</p>
+    <pre><code>pandoc input.txt --from=markdown+hard_line_breaks --to=docx -o output.docx</code></pre>
+    <p>
+      For teams and non-technical workflows that need instant browser access without installing command-line packages, <a href="https://www.digitoolvault.com/tools/txt-to-word">convert TXT to DOCX online</a> via DigiToolVault, which executes server-side AST parsing and automatically purges temporary files post-conversion.
+    </p>
+
+    <h2>4. Related OpenXML &amp; Document Parsing Tools</h2>
+    <ul>
+      <li><strong>Plain Text &amp; Notepad to Word:</strong> <a href="https://www.digitoolvault.com/tools/txt-to-word">https://www.digitoolvault.com/tools/txt-to-word</a></li>
+      <li><strong>AI / ChatGPT Markdown to Word:</strong> <a href="https://www.digitoolvault.com/tools/md-to-word">Markdown (.MD) to DOCX Converter</a></li>
+      <li><strong>Large PDF Layout Reconstruction:</strong> <a href="https://www.digitoolvault.com/tools/pdf-to-word">200MB PDF to Word Converter</a></li>
+      <li><strong>Financial Table Extraction:</strong> <a href="https://www.digitoolvault.com/tools/pdf-to-excel">PDF Bank Statement to Excel (.XLSX) Converter</a></li>
+    </ul>
+
+    <div class="footer">
+      Published as an open technical specification for document conversion workflows.
+    </div>
+  </main>
+</body>
+</html>
